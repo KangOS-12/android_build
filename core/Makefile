@@ -1,4 +1,13 @@
 # Put some miscellaneous rules here
+#
+# Build system colors
+#
+# PFX: Prefix "target C++:" in yellow
+# INS: Module "Install:" output color (cyan for ics)
+
+ifneq ($(BUILD_WITH_COLORS),0)
+    include $(TOP_DIR)build/core/colors.mk
+endif
 
 # HACK: clear LOCAL_PATH from including last build target before calling
 # intermedites-dir-for
@@ -5371,16 +5380,37 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(OTA_FROM_TARGET_
 
 TARGET_PACKAGE := $(PRODUCT_OUT)/$(KANGOS_RELEASE).zip
 
-.PHONY: otapackage bacon
+MD5 := prebuilts/build-tools/path/$(HOST_OS)-x86/md5sum
+
+.PHONY: otapackage bacon kangos
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
-bacon: otapackage
-  $(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(TARGET_PACKAGE) > $(TARGET_PACKAGE).md5sum
-	@echo -e ${CL_BLD}${CL_CYN}"===============================-Package complete-==============================="${CL_RST}
+bacon: kangos
+kangos: otapackage
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(TARGET_PACKAGE)
+	$(hide) $(MD5) $(TARGET_PACKAGE) > $(TARGET_PACKAGE).md5sum
+	@echo -e ${CL_RED}"                                               "${CL_RED}
+	@echo -e ${CL_RED}"=============-Package completed successfully-==============="${CL_RED}
+	@echo -e ${CL_RED}"***********************************************"${CL_RED}
+	@echo -e ${CL_RED}"						"${CL_RST}
+	@echo -e ${CL_RED}"  __  __                      ___  ____  	"${CL_RST}
+	@echo -e ${CL_RED}"  | |/ / __ _ _ __   __ _    / _ \/ ___| 	"${CL_RST}
+	@echo -e ${CL_BLU}"  | | / / _  |  _ \ / _  |  | | | \___ \ 	"${CL_RST}
+	@echo -e ${CL_CYN}"  | |  \ (_| | | | | (_| |  | |_| |___) |	"${CL_RST}
+	@echo -e ${CL_RED}"  |_|\__\__,_|_| |_|\__, |___\___/|____/ 	"${CL_RST}
+	@echo -e ${CL_RED}"                   |___/_____|          	"${CL_RST}
+	@echo -e ${CL_RED}"***********************************************"${CL_RED}
+	@echo -e ${CL_RED}"        Everything Kanged Successfully         "${CL_RED}
+	@echo -e ${CL_RED}"***********************************************"${CL_RED}
+	@echo -e ${CL_RED}"       KangOS Brought To You By Team Kang      "${CL_RED}
+	@echo -e ${CL_RED}"***********************************************"${CL_RED}
+	@echo -e ${CL_RED}"                                               "${CL_RED}
+	@echo -e ${CL_CYN}"════════════════════════════════════════════════════════════"${CL_RST}
 	@echo -e ${CL_BLD}${CL_YLW}"Zip: "${CL_YLW} $(TARGET_PACKAGE)${CL_RST}
 	@echo -e ${CL_BLD}${CL_YLW}"MD5: "${CL_YLW}" `cat $(TARGET_PACKAGE).md5sum | awk '{print $$1}' `"${CL_RST}
-	@echo -e ${CL_BLD}${CL_YLW}"Size:"${CL_YLW}" `du -sh $(TARGET_PACKAGE) | awk '{print $$1}' `"${CL_RST}
-	@echo -e ${CL_BLD}${CL_CYN}"================================================================================"${CL_RST}
+	@echo -e ${CL_BLD}${CL_YLW}"Size: "${CL_YLW}" `du -sh $(TARGET_PACKAGE) | awk '{print $$1}' `"${CL_RST}
+	@echo -e ${CL_BLD}${CL_YLW}"Integer Value:"${CL_YLW}" `wc -c $(TARGET_PACKAGE) | awk '{print $$1}' `"${CL_RST}
+	@echo -e ${CL_BLD}${CL_YLW}"TimeStamp:"${CL_YLW}" `cat $(PRODUCT_OUT)/system/build.prop | grep ro.build.date.utc | cut -d'=' -f2 | awk '{print $$1}' `"${CL_RST}
+	@echo -e ${CL_CYN}"════════════════════════════════════════════════════════════"${CL_RST}
 
 ifeq ($(BOARD_BUILD_RETROFIT_DYNAMIC_PARTITIONS_OTA_PACKAGE),true)
 name := $(product_name)-ota-retrofit-$(FILE_NAME_TAG)
